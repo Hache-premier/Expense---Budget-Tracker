@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useTransactions } from '../hooks/useTransactions.js'
+import { useCategories } from '../hooks/useCategories.js'
 
 function TransactionForm({ transactionToEdit, onFinishEditing }) {
   const { addTransaction, updateTransaction } = useTransactions()
+  const { categories } = useCategories()
 
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
@@ -17,6 +19,8 @@ function TransactionForm({ transactionToEdit, onFinishEditing }) {
       setCategory(transactionToEdit.category)
       setDate(transactionToEdit.date)
       setNote(transactionToEdit.note)
+    } else {
+      resetForm()
     }
   }, [transactionToEdit])
 
@@ -54,6 +58,7 @@ function TransactionForm({ transactionToEdit, onFinishEditing }) {
     <form onSubmit={handleSubmit}>
       <div>
         <label htmlFor="description">Description</label>
+
         <input
           id="description"
           type="text"
@@ -66,6 +71,7 @@ function TransactionForm({ transactionToEdit, onFinishEditing }) {
 
       <div>
         <label htmlFor="amount">Amount</label>
+
         <input
           id="amount"
           type="number"
@@ -78,18 +84,26 @@ function TransactionForm({ transactionToEdit, onFinishEditing }) {
 
       <div>
         <label htmlFor="category">Category</label>
-        <input
+
+        <select
           id="category"
-          type="text"
           value={category}
           onChange={(event) => setCategory(event.target.value)}
-          placeholder="e.g. Food"
           required
-        />
+        >
+          <option value="">Select a category</option>
+
+          {categories.map((categoryOption) => (
+            <option key={categoryOption.id} value={categoryOption.name}>
+              {categoryOption.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div>
         <label htmlFor="date">Date</label>
+
         <input
           id="date"
           type="date"
@@ -101,6 +115,7 @@ function TransactionForm({ transactionToEdit, onFinishEditing }) {
 
       <div>
         <label htmlFor="note">Note</label>
+
         <textarea
           id="note"
           value={note}

@@ -1,125 +1,75 @@
-import { useEffect, useState } from 'react'
-import { useTransactions } from '../hooks/useTransactions.js'
+import { Pencil, Trash2 } from "lucide-react";
+import { useTransactions } from "../hooks/useTransactions.js";
+import { formatMoney } from "../utils/formatMoney.js";
 
-function TransactionForm({ transactionToEdit, onFinishEditing }) {
-  const { addTransaction, updateTransaction } = useTransactions()
+function TransactionList({ transactions, onEdit }) {
+  const { deleteTransaction } = useTransactions();
 
-  const [description, setDescription] = useState('')
-  const [amount, setAmount] = useState('')
-  const [category, setCategory] = useState('')
-  const [date, setDate] = useState('')
-  const [note, setNote] = useState('')
+  function handleDelete(id) {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this transaction?",
+    );
 
-  useEffect(() => {
-    if (transactionToEdit) {
-      setDescription(transactionToEdit.description)
-      setAmount(String(transactionToEdit.amount))
-      setCategory(transactionToEdit.category)
-      setDate(transactionToEdit.date)
-      setNote(transactionToEdit.note)
+    if (confirmed) {
+      deleteTransaction(id);
     }
-  }, [transactionToEdit])
-
-  function resetForm() {
-    setDescription('')
-    setAmount('')
-    setCategory('')
-    setDate('')
-    setNote('')
-  }
-
-  function handleSubmit(event) {
-    event.preventDefault()
-
-    const transaction = {
-      id: transactionToEdit ? transactionToEdit.id : crypto.randomUUID(),
-      description,
-      amount: Number(amount),
-      category,
-      date,
-      note,
-    }
-
-    if (transactionToEdit) {
-      updateTransaction(transaction)
-      onFinishEditing()
-    } else {
-      addTransaction(transaction)
-    }
-
-    resetForm()
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="description">Description</label>
-        <input
-          id="description"
-          type="text"
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
-          placeholder="e.g. Salary"
-          required
-        />
-      </div>
+    <div className="transaction-list">
+      {transactions.map((transaction) => {
+        const isIncome = transaction.amount > 0;
 
-      <div>
-        <label htmlFor="amount">Amount</label>
-        <input
-          id="amount"
-          type="number"
-          value={amount}
-          onChange={(event) => setAmount(event.target.value)}
-          placeholder="e.g. 500000 or -25000"
-          required
-        />
-      </div>
+        return (
+          <article
+            className={`transaction-item ${isIncome ? "income" : "expense"}`}
+            key={transaction.id}
+          >
+            <div className="transaction-details">
+              <h3>{transaction.description}</h3>
 
-      <div>
-        <label htmlFor="category">Category</label>
-        <input
-          id="category"
-          type="text"
-          value={category}
-          onChange={(event) => setCategory(event.target.value)}
-          placeholder="e.g. Food"
-          required
-        />
-      </div>
+              <p>{transaction.category}</p>
 
-      <div>
-        <label htmlFor="date">Date</label>
-        <input
-          id="date"
-          type="date"
-          value={date}
-          onChange={(event) => setDate(event.target.value)}
-          required
-        />
-      </div>
+              <p>{transaction.date}</p>
 
-      <div>
-        <label htmlFor="note">Note</label>
-        <textarea
-          id="note"
-          value={note}
-          onChange={(event) => setNote(event.target.value)}
-          placeholder="Optional note"
-        />
-      </div>
+              {transaction.note && <p>{transaction.note}</p>}
+            </div>
 
-      <button type="submit">
-        {transactionToEdit ? 'Update Transaction' : 'Add Transaction'}
-      </button>
+            <div className="transaction-actions">
+              <p
+                className={`transaction-amount ${
+                  isIncome ? "income" : "expense"
+                }`}
+              >
+                {isIncome ? "+" : ""}
+                {formatMoney(transaction.amount)}
+              </p>
 
-      {transactionToEdit && (
-        <button type="button" onClick={onFinishEditing}>
-          Cancel
-        </button>
-      )}
-    </form>
-  )
+              <button
+                type="button"
+                className="icon-button"
+                onClick={() => onEdit(transaction)}
+                aria-label={`Edit ${transaction.description}`}
+                title="Edit transaction"
+              >
+                <Pencil size={18} />
+              </button>
+
+              <button
+                type="button"
+                className="icon-button delete-button"
+                onClick={() => handleDelete(transaction.id)}
+                aria-label={`Delete ${transaction.description}`}
+                title="Delete transaction"
+              >
+                <Trash2 size={18} />
+              </button>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  );
 }
 
-export default TransactionForm
+export default TransactionList;

@@ -1,24 +1,57 @@
-import { Link, Outlet } from 'react-router-dom'
+import { NavLink, Outlet } from "react-router-dom";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "../hooks/useTheme.js";
 
 function AppLayout() {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <div className="app-layout">
       <aside className="sidebar">
         <h1>Expense Tracker</h1>
 
         <nav>
-          <Link to="/">Dashboard</Link>
-          <Link to="/transactions">Transactions</Link>
-          <Link to="/budgets">Budgets</Link>
-          <Link to="/categories">Categories</Link>
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            Dashboard
+          </NavLink>
+
+          <NavLink
+            to="/transactions"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            Transactions
+          </NavLink>
+
+          <NavLink
+            to="/budgets"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            Budgets
+          </NavLink>
+
+          <NavLink
+            to="/categories"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            Categories
+          </NavLink>
         </nav>
+
+        <button type="button" onClick={toggleTheme} aria-label="Toggle theme">
+          {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+          {theme === "light" ? "Dark Mode" : "Light Mode"}
+        </button>
       </aside>
 
-      <main className="main-content">
+      <div className="main-content">
         <Outlet />
-      </main>
+      </div>
     </div>
-  )
+  );
 }
 
-export default AppLayout
+export default AppLayout;
