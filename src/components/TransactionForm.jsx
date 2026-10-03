@@ -1,57 +1,81 @@
-import { useEffect, useState } from 'react'
-import { useTransactions } from '../hooks/useTransactions.js'
-import { useCategories } from '../hooks/useCategories.js'
+import { useState } from 'react';
+import { useTransactions } from '../hooks/useTransactions.js';
+import { useCategories } from '../hooks/useCategories.js';
 
 function TransactionForm({ transactionToEdit, onFinishEditing }) {
-  const { addTransaction, updateTransaction } = useTransactions()
-  const { categories } = useCategories()
+  const { addTransaction, updateTransaction } = useTransactions();
+  const { categories } = useCategories();
 
-  const [description, setDescription] = useState('')
-  const [amount, setAmount] = useState('')
-  const [category, setCategory] = useState('')
-  const [date, setDate] = useState('')
-  const [note, setNote] = useState('')
-
-  useEffect(() => {
-    if (transactionToEdit) {
-      setDescription(transactionToEdit.description)
-      setAmount(String(transactionToEdit.amount))
-      setCategory(transactionToEdit.category)
-      setDate(transactionToEdit.date)
-      setNote(transactionToEdit.note)
-    } else {
-      resetForm()
-    }
-  }, [transactionToEdit])
+  const [description, setDescription] = useState(
+    transactionToEdit?.description ?? '',
+  );
+  const [amount, setAmount] = useState(
+    transactionToEdit ? String(transactionToEdit.amount) : '',
+  );
+  const [category, setCategory] = useState(
+    transactionToEdit?.category ?? '',
+  );
+  const [date, setDate] = useState(transactionToEdit?.date ?? '');
+  const [note, setNote] = useState(transactionToEdit?.note ?? '');
+  const [error, setError] = useState('');
 
   function resetForm() {
-    setDescription('')
-    setAmount('')
-    setCategory('')
-    setDate('')
-    setNote('')
+    setDescription('');
+    setAmount('');
+    setCategory('');
+    setDate('');
+    setNote('');
+    setError('');
   }
 
   function handleSubmit(event) {
-    event.preventDefault()
+    event.preventDefault();
+
+    const trimmedDescription = description.trim();
+    const numericAmount = Number(amount);
+
+    if (!trimmedDescription) {
+      setError('Please enter a description.');
+      return;
+    }
+
+    if (!amount || !Number.isFinite(numericAmount)) {
+      setError('Please enter a valid amount.');
+      return;
+    }
+
+    if (numericAmount === 0) {
+      setError('The amount cannot be zero.');
+      return;
+    }
+
+    if (!category) {
+      setError('Please select a category.');
+      return;
+    }
+
+    if (!date) {
+      setError('Please select a date.');
+      return;
+    }
 
     const transaction = {
       id: transactionToEdit ? transactionToEdit.id : crypto.randomUUID(),
-      description,
-      amount: Number(amount),
+      description: trimmedDescription,
+      amount: numericAmount,
       category,
       date,
-      note,
-    }
+      note: note.trim(),
+    };
 
     if (transactionToEdit) {
-      updateTransaction(transaction)
-      onFinishEditing()
+      updateTransaction(transaction);
+      onFinishEditing();
     } else {
-      addTransaction(transaction)
+      addTransaction(transaction);
     }
 
-    resetForm()
+    resetForm();
   }
 
   return (
@@ -63,7 +87,10 @@ function TransactionForm({ transactionToEdit, onFinishEditing }) {
           id="description"
           type="text"
           value={description}
-          onChange={(event) => setDescription(event.target.value)}
+          onChange={(event) => {
+            setDescription(event.target.value);
+            setError('');
+          }}
           placeholder="e.g. Salary"
           required
         />
@@ -76,10 +103,18 @@ function TransactionForm({ transactionToEdit, onFinishEditing }) {
           id="amount"
           type="number"
           value={amount}
-          onChange={(event) => setAmount(event.target.value)}
+          onChange={(event) => {
+            setAmount(event.target.value);
+            setError('');
+          }}
           placeholder="e.g. 500000 or -25000"
           required
         />
+
+        <small>
+          Use a positive amount for income and a negative amount for
+          expenses.
+        </small>
       </div>
 
       <div>
@@ -88,7 +123,10 @@ function TransactionForm({ transactionToEdit, onFinishEditing }) {
         <select
           id="category"
           value={category}
-          onChange={(event) => setCategory(event.target.value)}
+          onChange={(event) => {
+            setCategory(event.target.value);
+            setError('');
+          }}
           required
         >
           <option value="">Select a category</option>
@@ -108,7 +146,10 @@ function TransactionForm({ transactionToEdit, onFinishEditing }) {
           id="date"
           type="date"
           value={date}
-          onChange={(event) => setDate(event.target.value)}
+          onChange={(event) => {
+            setDate(event.target.value);
+            setError('');
+          }}
           required
         />
       </div>
@@ -124,6 +165,8 @@ function TransactionForm({ transactionToEdit, onFinishEditing }) {
         />
       </div>
 
+      {error && <p className="form-error">{error}</p>}
+
       <button type="submit">
         {transactionToEdit ? 'Update Transaction' : 'Add Transaction'}
       </button>
@@ -134,7 +177,7 @@ function TransactionForm({ transactionToEdit, onFinishEditing }) {
         </button>
       )}
     </form>
-  )
+  );
 }
 
-export default TransactionForm
+export default TransactionForm;
