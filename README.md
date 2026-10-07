@@ -157,6 +157,6 @@ The application is designed to work across:
 
 ### 📥 Clone the repository
 
-
+```bash
 git clone git@github.com:Hache-premier/expense-budget-tracker.git
 cd expense-budget-tracker
