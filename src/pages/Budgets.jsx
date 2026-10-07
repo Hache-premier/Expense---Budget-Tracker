@@ -1,18 +1,19 @@
-import { useState } from "react";
-import { Trash2 } from "lucide-react";
-import { useBudgets } from "../hooks/useBudgets.js";
-import { useCategories } from "../hooks/useCategories.js";
-import { useTransactions } from "../hooks/useTransactions.js";
-import { formatMoney } from "../utils/formatMoney.js";
+import { useState } from 'react';
+import { Trash2 } from 'lucide-react';
+import { useBudgets } from '../hooks/useBudgets.js';
+import { useCategories } from '../hooks/useCategories.js';
+import { useTransactions } from '../hooks/useTransactions.js';
+import { formatMoney } from '../utils/formatMoney.js';
+import CategoryOptions from '../components/CategoryOptions.jsx';
 
 function Budgets() {
   const { budgets, addBudget, updateBudget, deleteBudget } = useBudgets();
   const { categories } = useCategories();
   const { transactions } = useTransactions();
 
-  const [category, setCategory] = useState("");
-  const [month, setMonth] = useState("");
-  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState('');
+  const [month, setMonth] = useState('');
+  const [amount, setAmount] = useState('');
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -22,7 +23,8 @@ function Budgets() {
     }
 
     const existingBudget = budgets.find(
-      (budget) => budget.category === category && budget.month === month,
+      (budget) =>
+        budget.category === category && budget.month === month,
     );
 
     if (existingBudget) {
@@ -41,9 +43,9 @@ function Budgets() {
       addBudget(budget);
     }
 
-    setCategory("");
-    setMonth("");
-    setAmount("");
+    setCategory('');
+    setMonth('');
+    setAmount('');
   }
 
   function getSpentAmount(budget) {
@@ -54,12 +56,15 @@ function Budgets() {
           transaction.category === budget.category &&
           transaction.date.startsWith(budget.month),
       )
-      .reduce((total, transaction) => total + Math.abs(transaction.amount), 0);
+      .reduce(
+        (total, transaction) => total + Math.abs(transaction.amount),
+        0,
+      );
   }
 
   function handleDelete(id) {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this budget?",
+      'Are you sure you want to delete this budget?',
     );
 
     if (confirmed) {
@@ -88,12 +93,7 @@ function Budgets() {
               required
             >
               <option value="">Select a category</option>
-
-              {categories.map((categoryOption) => (
-                <option key={categoryOption.id} value={categoryOption.name}>
-                  {categoryOption.name}
-                </option>
-              ))}
+              <CategoryOptions categories={categories} />
             </select>
           </div>
 
@@ -139,20 +139,23 @@ function Budgets() {
             {budgets.map((budget) => {
               const spent = getSpentAmount(budget);
               const percentage =
-                budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
+                budget.amount > 0
+                  ? (spent / budget.amount) * 100
+                  : 0;
               const progress = Math.min(percentage, 100);
               const remaining = budget.amount - spent;
               const isOverBudget = spent > budget.amount;
-              const isNearLimit = !isOverBudget && percentage >= 80;
+              const isNearLimit =
+                !isOverBudget && percentage >= 80;
 
               return (
                 <article
                   className={`budget-card ${
                     isOverBudget
-                      ? "over-budget"
+                      ? 'over-budget'
                       : isNearLimit
-                        ? "near-limit"
-                        : ""
+                        ? 'near-limit'
+                        : ''
                   }`}
                   key={budget.id}
                 >
@@ -206,14 +209,17 @@ function Budgets() {
 
                     {isOverBudget ? (
                       <span className="budget-warning">
-                        Over budget by {formatMoney(spent - budget.amount)}
+                        Over budget by{' '}
+                        {formatMoney(spent - budget.amount)}
                       </span>
                     ) : isNearLimit ? (
                       <span className="budget-warning">
                         Approaching budget limit
                       </span>
                     ) : (
-                      <span>{formatMoney(remaining)} remaining</span>
+                      <span>
+                        {formatMoney(remaining)} remaining
+                      </span>
                     )}
                   </div>
                 </article>

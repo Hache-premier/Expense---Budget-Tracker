@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import TransactionForm from '../components/TransactionForm.jsx';
 import TransactionList from '../components/TransactionList.jsx';
+import CategoryOptions from '../components/CategoryOptions.jsx';
 import { useCategories } from '../hooks/useCategories.js';
 import { useTransactions } from '../hooks/useTransactions.js';
 import { useDebouncedValue } from '../hooks/useDebouncedValue.js';
@@ -112,15 +113,7 @@ function Transactions() {
               onChange={(event) => setCategory(event.target.value)}
             >
               <option value="">All Categories</option>
-
-              {categories.map((categoryOption) => (
-                <option
-                  key={categoryOption.id}
-                  value={categoryOption.name}
-                >
-                  {categoryOption.name}
-                </option>
-              ))}
+              <CategoryOptions categories={categories} />
             </select>
           </div>
 
