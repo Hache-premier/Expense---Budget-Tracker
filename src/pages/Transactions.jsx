@@ -1,19 +1,19 @@
-import { useState } from "react";
-import TransactionForm from "../components/TransactionForm.jsx";
-import TransactionList from "../components/TransactionList.jsx";
-import { useCategories } from "../hooks/useCategories.js";
-import { useTransactions } from "../hooks/useTransactions.js";
-import { useDebouncedValue } from "../hooks/useDebouncedValue.js";
+import { useState } from 'react';
+import TransactionForm from '../components/TransactionForm.jsx';
+import TransactionList from '../components/TransactionList.jsx';
+import { useCategories } from '../hooks/useCategories.js';
+import { useTransactions } from '../hooks/useTransactions.js';
+import { useDebouncedValue } from '../hooks/useDebouncedValue.js';
 
 function Transactions() {
   const { transactions } = useTransactions();
   const { categories } = useCategories();
 
   const [transactionToEdit, setTransactionToEdit] = useState(null);
-  const [month, setMonth] = useState("");
-  const [type, setType] = useState("all");
-  const [category, setCategory] = useState("");
-  const [search, setSearch] = useState("");
+  const [month, setMonth] = useState('');
+  const [type, setType] = useState('all');
+  const [category, setCategory] = useState('');
+  const [search, setSearch] = useState('');
 
   const debouncedSearch = useDebouncedValue(search, 300);
 
@@ -25,22 +25,35 @@ function Transactions() {
     setTransactionToEdit(null);
   }
 
-  const filteredTransactions = transactions.filter((transaction) => {
-    const matchesMonth = !month || transaction.date.startsWith(month);
+  const filteredTransactions = [...transactions]
+    .filter((transaction) => {
+      const matchesMonth =
+        !month || transaction.date.startsWith(month);
 
-    const matchesType =
-      type === "all" ||
-      (type === "income" && transaction.amount > 0) ||
-      (type === "expense" && transaction.amount < 0);
+      const matchesType =
+        type === 'all' ||
+        (type === 'income' && transaction.amount > 0) ||
+        (type === 'expense' && transaction.amount < 0);
 
-    const matchesCategory = !category || transaction.category === category;
+      const matchesCategory =
+        !category || transaction.category === category;
 
-    const matchesSearch =
-      !debouncedSearch ||
-      transaction.note.toLowerCase().includes(debouncedSearch.toLowerCase());
+      const matchesSearch =
+        !debouncedSearch ||
+        (transaction.note || '')
+          .toLowerCase()
+          .includes(debouncedSearch.toLowerCase());
 
-    return matchesMonth && matchesType && matchesCategory && matchesSearch;
-  });
+      return (
+        matchesMonth &&
+        matchesType &&
+        matchesCategory &&
+        matchesSearch
+      );
+    })
+    .sort((first, second) =>
+      second.date.localeCompare(first.date),
+    );
 
   return (
     <main>
@@ -50,10 +63,12 @@ function Transactions() {
       </header>
 
       <section>
-        <h2>{transactionToEdit ? "Edit Transaction" : "Add Transaction"}</h2>
+        <h2>
+          {transactionToEdit ? 'Edit Transaction' : 'Add Transaction'}
+        </h2>
 
         <TransactionForm
-          key={transactionToEdit?.id ?? "new"}
+          key={transactionToEdit?.id ?? 'new'}
           transactionToEdit={transactionToEdit}
           onFinishEditing={finishEditing}
         />
@@ -99,7 +114,10 @@ function Transactions() {
               <option value="">All Categories</option>
 
               {categories.map((categoryOption) => (
-                <option key={categoryOption.id} value={categoryOption.name}>
+                <option
+                  key={categoryOption.id}
+                  value={categoryOption.name}
+                >
                   {categoryOption.name}
                 </option>
               ))}
@@ -121,10 +139,10 @@ function Transactions() {
           <button
             type="button"
             onClick={() => {
-              setMonth("");
-              setType("all");
-              setCategory("");
-              setSearch("");
+              setMonth('');
+              setType('all');
+              setCategory('');
+              setSearch('');
             }}
           >
             Clear Filters
